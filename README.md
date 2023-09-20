@@ -28,7 +28,8 @@ Hierzu muss die GUI interaktiver gestaltet werden - ein Spielablauf muss live au
 Einer der Spieler wird nun vom Roboter übernommen. Nachdem der User seinen Zug über die GUI gemacht hat reagiert der Roboter mit seinem eigenen Spielzug.
 Damit dies geschehen kann, muss eine Spiellogik implementiert werden. Je nach genauer Umsetzung wird zusätzlich eine Fehlerüberprüfung benötigt. Andernfalls könnte der User illegale Züge ausführen. 
 
-![grafik](https://github.com/adrianmoerk/RoboterArmProjekt/assets/128092143/354dbe4b-9db9-4bcf-a219-2f161d368a39)
+![grafik](https://github.com/adrianmoerk/RoboterArmProjekt/assets/128092143/bbd14dcc-f293-4e71-95c0-c09623bd43ec)
+
 
 ## Features/Bugs
 
