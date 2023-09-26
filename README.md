@@ -14,9 +14,14 @@ Dazu soll der Roboter zunächst in der Lage sein gespeicherte Schachspiele demon
 - Figuren absetzen können
 - Eingelesenes (Schach-)Dateiformat als Bewegungsanleitung verwenden
 
+## Milestone 0
+
+Die Projektplanung wurde so weit abgeschlossen. Softwaredesign wurde vom Team ausdiskutiert und beschlossen. Die Kommunikationsschnittstellen zwischen dem Front- und Backend wurden ermittelt. Aufgaben wurden ausformuliert und verteilt.  
+Entwicklungsumgebung wurde eingerichtet und die Simulationsumgebung läuft auf den Maschinen des Teams.
+
 ## Milestone 1
 
-Der Roboter sollte in der Lage sein Figuren zuverlässig von einem Feld zu einem anderen zu bewegen. Die Bewegungsabläufe sollten automatisch aus einer Datei entnommen und umgesetzt werden. Beide Spieler werden hierbei von dem Roboter simuliert. AUf der Benutzeroberfläche werden die Züge synchron dargestellt und der User hat grundlegende Funktionen wie "Start", "Stop" oder "Pause" zur Auswahl.
+Der Roboter sollte in der Lage sein Figuren zuverlässig von einem Feld zu einem anderen zu bewegen. Die Bewegungsabläufe sollten automatisch aus einer Datei entnommen und umgesetzt werden. Beide Spieler werden hierbei von dem Roboter simuliert. Auf der Benutzeroberfläche werden die Züge synchron dargestellt und der User hat grundlegende Funktionen wie "Start", "Stop" oder "Pause" zur Auswahl.
 
 ## Milestone 2
 
