@@ -19,16 +19,18 @@ Dazu soll der Roboter zunächst in der Lage sein gespeicherte Schachspiele demon
 Die Projektplanung wurde so weit abgeschlossen. Softwaredesign wurde vom Team ausdiskutiert und beschlossen. Die Kommunikationsschnittstellen zwischen dem Front- und Backend wurden ermittelt. Aufgaben wurden ausformuliert und verteilt.  
 Entwicklungsumgebung wurde eingerichtet und die Simulationsumgebung läuft auf den Maschinen des Teams.
 
-## Milestone 1
+# Geplante Releases:
+
+## Version 1.0
 
 Der Roboter sollte in der Lage sein Figuren zuverlässig von einem Feld zu einem anderen zu bewegen. Die Bewegungsabläufe sollten automatisch aus einer Datei entnommen und umgesetzt werden. Beide Spieler werden hierbei von dem Roboter simuliert. Auf der Benutzeroberfläche werden die Züge synchron dargestellt und der User hat grundlegende Funktionen wie "Start", "Stop" oder "Pause" zur Auswahl.
 
-## Milestone 2
+## Version 1.1
 
 User übernehmen die Rollen der beiden Spieler. Ihre Eingaben werden über die GUI erfasst und durch den Roboter realisiert. 
 Hierzu muss die GUI interaktiver gestaltet werden - ein Spielablauf muss live aufgezeichnet und dem Roboter übergeben werden.
 
-## Milestone 3
+## Version 1.2
 
 Einer der Spieler wird nun vom Roboter übernommen. Nachdem der User seinen Zug über die GUI gemacht hat reagiert der Roboter mit seinem eigenen Spielzug.
 Damit dies geschehen kann, muss eine Spiellogik implementiert werden. Je nach genauer Umsetzung wird zusätzlich eine Fehlerüberprüfung benötigt. Andernfalls könnte der User illegale Züge ausführen. 
