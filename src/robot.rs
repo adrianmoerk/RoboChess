@@ -1,11 +1,34 @@
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
 
+/// Represents a UR10 robotic arm that can be controlled via TCP.
 pub struct RobotArm {
     stream: TcpStream,
 }
 
 impl RobotArm {
+    /// Creates a new instance of the `RobotArm` by connecting to the specified address.
+    ///
+    /// This method establishes a TCP connection to the given address (typically the robotic arm's controller).
+    /// Once connected, the `RobotArm` can be used to send various commands to control the robot.
+    ///
+    /// # Parameters
+    ///
+    /// * `address`: The TCP address of the robot controller, in the format "IP:PORT".
+    ///
+    /// # Returns
+    ///
+    /// Returns a `Result` containing an instance of the `RobotArm` if the connection is successful,
+    /// or an error if there are any issues establishing the connection.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # async fn run() -> Result<(), Box<dyn std::error::Error>> {
+    /// let robot_arm = RobotArm::new("192.168.2.40:30002").await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn new(address: &str) -> Result<Self, Box<dyn std::error::Error>> {
         let stream = TcpStream::connect(address).await?;
         Ok(RobotArm { stream })
