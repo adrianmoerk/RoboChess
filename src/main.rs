@@ -1,11 +1,9 @@
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
-
+mod robot;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut stream = TcpStream::connect("192.168.2.40:30002").await?; // Port 30002 ist für URScript-Befehle
-    let move_command = "movej([0, -1.57, 0, -1.57, 0, 0], a=1.2, v=0.3)\n"; // Beispielbefehl
-    stream.write_all(move_command.as_bytes()).await?;
+    let mut roboter_arm = robot::RobotArm::new("192.168.2.40:30002").await.unwrap();
+    roboter_arm.movel(1.0, 1.0, 1.0, 0.0, 0.0, 0.0, None, None).await.unwrap();
     Ok(())
 }
-// HAT GEKLAPPT
