@@ -65,6 +65,7 @@ impl RobotArm {
             a_str,
             v_str
         );
+        println!("command:\n{}",command);
         self.stream.write_all(command.as_bytes()).await?;
         Ok(())
     }
@@ -104,6 +105,7 @@ impl RobotArm {
             a_str,
             v_str
         );
+        println!("command:\n{}",command);
         self.stream.write_all(command.as_bytes()).await?;
         Ok(())
     }
@@ -145,6 +147,7 @@ impl RobotArm {
             a_str,
             v_str
         );
+        println!("command:\n{}",command);
         self.stream.write_all(command.as_bytes()).await?;
         Ok(())
     }
@@ -196,6 +199,7 @@ impl RobotArm {
             a_str,
             v_str
         );
+        println!("command:\n{}",command);
         self.stream.write_all(command.as_bytes()).await?;
         Ok(())
     }
