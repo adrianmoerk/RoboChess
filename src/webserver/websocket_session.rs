@@ -34,25 +34,25 @@ impl WsChatSession {
     /// helper method that sends ping to client every 5 seconds (HEARTBEAT_INTERVAL).
     ///
     /// also this method checks heartbeats from client
-    fn hb(&self, ctx: &mut ws::WebsocketContext<Self>) {
-        ctx.run_interval(HEARTBEAT_INTERVAL, |act, ctx| {
-            // check client heartbeats
-            if Instant::now().duration_since(act.hb) > CLIENT_TIMEOUT {
-                // heartbeat timed out
-                println!("Websocket Client heartbeat failed, disconnecting!");
+    fn hb(&self, _ctx: &mut ws::WebsocketContext<Self>) {
+        // ctx.run_interval(HEARTBEAT_INTERVAL, |act, ctx| {
+        //     // check client heartbeats
+        //     if Instant::now().duration_since(act.hb) > CLIENT_TIMEOUT {
+        //         // heartbeat timed out
+        //         println!("Websocket Client heartbeat failed, disconnecting!");
 
-                // notify chat server
-                act.addr.do_send(server::Disconnect { id: act.id });
+        //         // notify chat server
+        //         act.addr.do_send(server::Disconnect { id: act.id });
 
-                // stop actor
-                ctx.stop();
+        //         // stop actor
+        //         ctx.stop();
 
-                // don't try to send a ping
-                return;
-            }
+        //         // don't try to send a ping
+        //         return;
+        //     }
 
-            ctx.ping(b"");
-        });
+        //     ctx.ping(b"");
+        // });
     }
 }
 
