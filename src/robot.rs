@@ -2,7 +2,7 @@ use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
 
 const BASE_FIELD_A_COORDINATES: (f32, f32, f32, f32, f32, f32) = (
-    -245.85, -857.72, 199.7, 1.211, 2.896, 0.012,
+    -0.245894455361, -0.857736571541, 0.199742457810, 1.211315540742, 2.895724392903, 0.011966278988,
 );
 const FIELD_SIZE: f32 = 37.0;
 
