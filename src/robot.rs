@@ -1,9 +1,55 @@
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
 
+const BASE_FIELD_A_COORDINATES: (f32, f32, f32, f32, f32, f32) = (
+    -245.85, -857.72, 199.7, 1.211, 2.896, 0.012,
+);
+const FIELD_SIZE: f32 = 37.0;
+
 /// Represents a UR10 robotic arm that can be controlled via TCP.
 pub struct RobotArm {
     stream: TcpStream,
+}
+/// Represents a chess tile on the chess board.
+pub struct ChessTilePosition {
+    // field in a to h
+    field_char: char,
+    // field from 1 to 8
+    field_num: u8,
+}
+
+impl ChessTilePosition {
+    /// Creates a new instance of the `ChessTileCoordinates` struct.
+    /// # Arguments
+    /// * `field_char` - The field in a to h
+    /// * `field_num` - The field from 1 to 8
+    pub fn new_position(field_char: char, field_num: u8) -> Self {
+        Self { field_char, field_num }
+    }
+    /// Converts the chess tile coordinates to cartesian coordinates.
+    /// # Returns
+    /// X, Y, Z, RX, RY, RZ
+    pub fn convert_pos_to_coords(&self) -> (f32, f32, f32, f32, f32, f32) {
+        let x = match self.field_char {
+            'a' => { BASE_FIELD_A_COORDINATES.0 }
+            'b' => { BASE_FIELD_A_COORDINATES.0 + FIELD_SIZE }
+            'c' => { BASE_FIELD_A_COORDINATES.0 + FIELD_SIZE * 2.0 }
+            'd' => { BASE_FIELD_A_COORDINATES.0 + FIELD_SIZE * 3.0 }
+            'e' => { BASE_FIELD_A_COORDINATES.0 + FIELD_SIZE * 4.0 }
+            'f' => { BASE_FIELD_A_COORDINATES.0 + FIELD_SIZE * 5.0 }
+            'g' => { BASE_FIELD_A_COORDINATES.0 + FIELD_SIZE * 6.0 }
+            'h' => { BASE_FIELD_A_COORDINATES.0 + FIELD_SIZE * 7.0 }
+            _ => panic!("Error: Invalid field_char"),
+        };
+
+        let y = BASE_FIELD_A_COORDINATES.1 + FIELD_SIZE * ((self.field_num as f32) - 1.0);
+        let z = BASE_FIELD_A_COORDINATES.2;
+        let rx = BASE_FIELD_A_COORDINATES.3;
+        let ry = BASE_FIELD_A_COORDINATES.4;
+        let rz = BASE_FIELD_A_COORDINATES.5;
+
+        (x, y, z, rx, ry, rz)
+    }
 }
 
 impl RobotArm {
@@ -253,5 +299,20 @@ impl RobotArm {
         );
         self.stream.write_all(command.as_bytes()).await?;
         Ok(())
+    }
+
+    /// Bewegt den Roboterarm zu einem bestimmten Schachfeld.
+    ///
+    /// # Arguments
+    ///
+    /// * `chess_tile` - Die Koordinaten des Schachfeldes im `ChessTileCoordinates` Format.
+    pub async fn move_to_field(
+        &mut self,
+        chess_tile: &ChessTilePosition,
+        a: Option<f32>,
+        v: Option<f32>
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let (x, y, z, rx, ry, rz) = chess_tile.convert_pos_to_coords();
+        self.movel(x, y, z, rx, ry, rz, a, v).await
     }
 }
