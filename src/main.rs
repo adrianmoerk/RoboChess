@@ -8,7 +8,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tokio::spawn(async {
         let test_field = ChessTilePosition::new_position('c', 3);
         test_field.convert_pos_to_coords();
-        let mut roboter_arm = robot::RobotArm::new("192.168.2.40:30002").await.unwrap();
+        // let mut roboter_arm = robot::RobotArm::new("192.168.2.40:30002").await.unwrap();
+        let mut roboter_arm = robot::RobotArm::new("ur-2018300294:30002").await.unwrap();
 
 
         let command = String::from("get_tcp_offset()");
