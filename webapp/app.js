@@ -5,7 +5,7 @@ const infoDisplay = document.querySelector('#info-display');
 const width = 8;
 
 
-let playerGo = 'white';
+let playerGo = 'Weiss';
 
 playerDisplay.textContent = playerGo;
 
@@ -36,17 +36,17 @@ function createBoard() {
 
         // Determine the color of Squares
         if (row % 2 === 0) {
-            square.classList.add(i % 2 === 0 ? 'white-square' : 'black-square');
+            square.classList.add(i % 2 === 0 ? 'Weiss-square' : 'Schwarz-square');
             } else {
-            square.classList.add(i % 2 === 0 ? 'black-square' : 'white-square');
+            square.classList.add(i % 2 === 0 ? 'Schwarz-square' : 'Weiss-square');
             }
 
         // Determine the color of the pieces
         if (i <= 15) {
-            square.firstChild.firstChild.classList.add('black-piece');
+            square.firstChild.firstChild.classList.add('Schwarz-piece');
         } else if (i >= 48) {
 
-            square.firstChild.firstChild.classList.add('white-piece');
+            square.firstChild.firstChild.classList.add('Weiss-piece');
         }
 
         gameBoard.append(square);
@@ -90,7 +90,7 @@ function dragDrop(e) {
 
     const correctGo = draggedElement.firstChild.classList.contains(playerGo + '-piece');
     // Ternary operator
-    const opponentGo = playerGo === 'black' ? 'white' : 'black';
+    const opponentGo = playerGo === 'Schwarz' ? 'Weiss' : 'Schwarz';
     const taken = e.target.classList.contains('piece');
     const takenByOpponent = e.target.firstChild?.classList.contains(opponentGo + '-piece');
 
@@ -115,9 +115,9 @@ function dragDrop(e) {
                 e.target.remove();
                 // Only change players if the game is still ongoing
                 if (!checkWin()) changePlayer();
-            } else notifyPlayer('You can not go there!');
+            } else notifyPlayer('Du kannst dort nicht hin!');
         }
-        else notifyPlayer('You can not go there!');
+        else notifyPlayer('Du kannst dort nicht hin!');
     }
 }
 
@@ -139,7 +139,7 @@ function notifyPlayer(message, useTimer = true) {
 
 
 function changePlayer() {
-    playerGo = playerGo === 'white' ? 'black' : 'white';
+    playerGo = playerGo === 'Weiss' ? 'Schwarz' : 'Weiss';
     playerDisplay.textContent = playerGo;
 }
 
@@ -163,7 +163,7 @@ function isValidMove(target, taken, takenByOpponent) {
         'pawn': () => {
             let direction = 1;
             // Flip the rows depending on who's playing. 
-            if (playerGo === 'white') {
+            if (playerGo === 'Weiss') {
                 startRow = width - 1 - startRow;
                 targetRow = width - 1 - targetRow;
                 direction = -1;
@@ -224,7 +224,7 @@ function checkWin() {
 
     // If there is one less king piece then the current player wins: The current player only changes when this function returns false
     if (kings.length < 2) {
-        notifyPlayer(`${playerGo} player wins`, false);
+        notifyPlayer(`${playerGo}er Spieler gewinnt!`, false);
         playerDisplay.parentElement.textContent = '';
         console.log(`${playerGo} won`);
         playerGo = '';

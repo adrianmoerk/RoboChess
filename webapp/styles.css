@@ -24,11 +24,11 @@ body {
     position: relative;
 }
 
-.white-square {
+.Weiss-square {
     background-color: rgb(255, 255, 255);
 }
 
-.black-square {
+.Schwarz-square {
     background-color: rgb(71, 164, 70);
 }
 
@@ -50,13 +50,13 @@ path {
     z-index: 9;
 }
 
-.black-piece {
+.Schwarz-piece {
     fill: rgb(28, 28, 28);
     stroke-width: 8px;
     stroke: white;
 }
 
-.white-piece {
+.Weiss-piece {
     fill: rgb(255, 255, 255);
     stroke-width: 8px;
     stroke: black;
@@ -66,8 +66,8 @@ path {
     margin-left: 20px;
 }
 
-#black-captures,
-#white-captures {
+#Schwarz-captures,
+#Weiss-captures {
     display: flex;
     flex-wrap: wrap;
     background-color: ghostwhite;
@@ -77,7 +77,7 @@ path {
     margin: auto;
 }
 
-#black-captures {
+#Schwarz-captures {
     border-color: rgba(43, 43, 43, 0.4);
 }
 
