@@ -11,9 +11,9 @@ pub struct RobotArm {
 /// Represents a chess tile on the chess board.
 pub struct ChessTilePosition {
     // field in a to h
-    field_char: char,
+    pub field_char: char,
     // field from 1 to 8
-    field_num: u8,
+    pub field_num: u8,
 }
 
 impl ChessTilePosition {
