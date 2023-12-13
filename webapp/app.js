@@ -1,6 +1,15 @@
 const gameBoard = document.querySelector('#gameboard');
 const playerDisplay = document.querySelector('#player');
 const infoDisplay = document.querySelector('#info-display');
+const socket = new WebSocket('ws://127.0.0.1:8080/ws');
+
+// called when the connection is established
+socket.onopen = function () {
+	console.log("WebSocket connection established");
+	// used to join desired room, just socket.send("/join <anything>")
+	socket.send("/join test");
+	socket.send("HELLO WORLD");
+};
 
 const width = 8;
 
@@ -102,6 +111,7 @@ function dragDrop(e) {
 
             // Output moves to the console
             console.log(moveString);
+            socket.send(moveString);
 
             // This will immediately reset the info display when a valid move is made before the notification reset timer clears the last notification
             notifyPlayer('', false);
@@ -227,6 +237,7 @@ function checkWin() {
         notifyPlayer(`${playerGo}er Spieler gewinnt!`, false);
         playerDisplay.parentElement.textContent = '';
         console.log(`${playerGo} won`);
+        socket.send(`${playerGo} won`);
         playerGo = '';
         
         // Make all the remaining pieces non-draggable so the game kind of ends

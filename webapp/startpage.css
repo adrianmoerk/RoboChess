@@ -8,7 +8,7 @@ body {
     justify-content: center;
     height: 100vh;
     opacity: 0;
-    transition: opacity 1s;
+    transition: opacity 2s;
 }
 
 .container {
