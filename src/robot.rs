@@ -27,6 +27,31 @@ impl ChessTilePosition {
             field_num,
         }
     }
+    /// Creates a new instance of the `ChessTileCoordinates` struct from a string.
+    pub fn position_from_str(position_str: String) -> Self {
+        let position_str_vec = position_str.split("").collect::<Vec<&str>>();
+        let field_char = position_str_vec
+            .get(0)
+            .unwrap()
+            .to_string()
+            .chars()
+            .next()
+            .unwrap();
+        let field_num = position_str_vec
+            .get(1)
+            .unwrap()
+            .to_string()
+            .parse::<u8>()
+            .unwrap();
+        println!(
+            "GOT {}, converted to {}{}",
+            position_str, field_char, field_num
+        );
+        Self {
+            field_char,
+            field_num,
+        }
+    }
     /// Converts the chess tile coordinates to cartesian coordinates.
     /// # Returns
     /// X, Y, Z, RX, RY, RZ
