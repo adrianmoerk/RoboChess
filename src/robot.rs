@@ -54,6 +54,35 @@ impl ChessTilePosition {
         );
         (x, y, z, rx, ry, rz)
     }
+    /// Converts the chess tile coordinates to cartesian coordinates.
+    /// # Warning:
+    /// Coordinates generated using this method will be lower than the safe chess tile coordinates.
+    /// # Returns
+    /// X, Y, Z, RX, RY, RZ
+    pub fn convert_pos_to_low_coords(&self) -> (f32, f32, f32, f32, f32, f32) {
+        let x = match self.field_char {
+            'a' => A1_COORDINATES.0,
+            'b' => A1_COORDINATES.0 + FIELD_SIZE,
+            'c' => A1_COORDINATES.0 + FIELD_SIZE * 2.0,
+            'd' => A1_COORDINATES.0 + FIELD_SIZE * 3.0,
+            'e' => A1_COORDINATES.0 + FIELD_SIZE * 4.0,
+            'f' => A1_COORDINATES.0 + FIELD_SIZE * 5.0,
+            'g' => A1_COORDINATES.0 + FIELD_SIZE * 6.0,
+            'h' => A1_COORDINATES.0 + FIELD_SIZE * 7.0,
+            _ => panic!("Error: Invalid field_char"),
+        };
+
+        let y = A1_COORDINATES.1 + FIELD_SIZE * ((self.field_num as f32) - 1.0);
+        let z = A1_COORDINATES.2 - 0.1;
+        let rx = A1_COORDINATES.3;
+        let ry = A1_COORDINATES.4;
+        let rz = A1_COORDINATES.5;
+        println!(
+            "Converted {}{} to \nx: {}, y: {}, z: {}, rx: {}, ry: {}, rz: {}",
+            self.field_char, self.field_num, x, y, z, rx, ry, rz
+        );
+        (x, y, z, rx, ry, rz)
+    }
 }
 
 impl RobotArm {
@@ -291,6 +320,107 @@ impl RobotArm {
         let (x, y, z, rx, ry, rz) = chess_tile.convert_pos_to_coords();
         self.movel(x, y, z, rx, ry, rz, a, v).await
     }
+    /// Bewegt den Roboterarm nah zum Boden eines bestimmten Schachfeldes.
+    ///
+    /// # Arguments
+    ///
+    /// * `chess_tile` - Die Koordinaten des Schachfeldes im `ChessTileCoordinates` Format.
+    pub async fn move_to_field_low(
+        &mut self,
+        chess_tile: &ChessTilePosition,
+        a: Option<f32>,
+        v: Option<f32>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let (x, y, z, rx, ry, rz) = chess_tile.convert_pos_to_low_coords();
+        self.movel(x, y, z, rx, ry, rz, a, v).await
+    }
+    /// Sends a command to the robot to open the gripper.
+    pub async fn open_gripper(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        let command = "rq_open()\n";
+        self.stream.write_all(command.as_bytes()).await?;
+        Ok(())
+    }
 
-    
+    /// Sends a command to the robot to close the gripper.
+    pub async fn close_gripper(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        let command = "rq_close()\n";
+        self.stream.write_all(command.as_bytes()).await?;
+        Ok(())
+    }
+    /// Moves the robot arm to the specified chess tile and picks up the chess piece.
+    /// # Arguments
+    /// * `chess_tile` - The coordinates of the field to pick up the chess piece from.
+    pub async fn pickup_chess_piece(
+        &mut self,
+        chess_tile: &ChessTilePosition,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        // move over field
+        self.move_to_field(chess_tile, None, None).await?;
+        // open gripper
+        self.open_gripper().await?;
+        // move down
+        self.move_to_field_low(chess_tile, None, None).await?;
+        // close gripper
+        self.close_gripper().await?;
+        // move up
+        self.move_to_field(chess_tile, None, None).await?;
+        Ok(())
+    }
+    /// Moves a chess piece from one field to another.
+    /// # Arguments
+    /// * `from_chess_tile` - The coordinates of the field to pick up the chess piece from.
+    /// * `to_chess_tile` - The coordinates of the field to move the chess piece to.
+    pub async fn move_chesspiece_to_empty_field(
+        &mut self,
+        from_chess_tile: &ChessTilePosition,
+        destination_chess_tile: &ChessTilePosition,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        // pickup chess piece from original field
+        self.pickup_chess_piece(from_chess_tile).await.unwrap();
+        // move over destination field
+        self.move_to_field(destination_chess_tile, None, None)
+            .await
+            .unwrap();
+        // move down to destination height
+        self.move_to_field_low(destination_chess_tile, None, None)
+            .await
+            .unwrap();
+        // open gripper, place chess piece on destination field
+        self.open_gripper().await.unwrap();
+        // move back up to safe height
+        self.move_to_field(destination_chess_tile, None, None)
+            .await
+            .unwrap();
+        Ok(())
+    }
+    /// Moves a chess piece from one field to another, removing the chess piece on the destination field.
+    /// # Arguments
+    /// * `from_chess_tile` - The coordinates of the field to pick up the chess piece from.
+    /// * `to_chess_tile` - The coordinates of the field to move the chess piece to.
+    pub async fn move_chesspiece_to_occupied_field(
+        &mut self,
+        from_chess_tile: &ChessTilePosition,
+        destination_chess_tile: &ChessTilePosition,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        // pickup chesspiece from destination field
+        self.pickup_chess_piece(destination_chess_tile)
+            .await
+            .unwrap();
+        // move chesspiece to dead pieces area
+        self.move_to_field(
+            &ChessTilePosition::new_position(destination_chess_tile.field_char, 10),
+            None,
+            None,
+        )
+        .await
+        .unwrap();
+        // open gripper
+        self.open_gripper().await.unwrap();
+        // move to empty field
+        self.move_chesspiece_to_empty_field(from_chess_tile, destination_chess_tile)
+            .await
+            .unwrap();
+
+        Ok(())
+    }
 }

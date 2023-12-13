@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use robot::ChessTilePosition;
+use tokio::io::AsyncWriteExt;
 mod chess_tiles;
 mod robot;
 mod webserver;
@@ -12,6 +13,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let a8 = ChessTilePosition::new_position('a', 8);
         let h8 = ChessTilePosition::new_position('h', 8);
         let h1 = ChessTilePosition::new_position('h', 1);
+
+        roboter_arm.open_gripper().await.unwrap();
+
+        tokio::time::sleep(Duration::from_secs(8)).await;
         roboter_arm.move_to_field(&a1, None, None).await.unwrap();
         tokio::time::sleep(Duration::from_secs(8)).await;
         roboter_arm.move_to_field(&a8, None, None).await.unwrap();
