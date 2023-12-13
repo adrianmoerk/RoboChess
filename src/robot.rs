@@ -1,22 +1,8 @@
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
 
-const A1_COORDINATES: (f32, f32, f32, f32, f32, f32) = (
-    -0.2774, -0.598, 0.250, 2.222, -2.222, 0.0,
-);
-// #TODO
-const A2_COORDINATES: (f32, f32, f32, f32, f32, f32) = (
-    -0.27125, -0.831, 0.19974245781, 1.211315540742, 2.895724392903, 0.011966278988,
-);
-const A3_COORDINATES_ERRECHNET: (f32, f32, f32, f32, f32, f32) = (
-    -0.296605544639, -0.804263428459, 0.19974245781, 1.211315540742, 2.895724392903, 0.011966278988,
-);
-// const B1_COORDINATES: (f32, f32, f32, f32, f32, f32)=();
-// const BASE_FIELD_A_COORDINATES: (f32, f32, f32, f32, f32, f32) =
-//     (-245.85, -857.72, 199.7, 1.211, 2.896, 0.012);
+const A1_COORDINATES: (f32, f32, f32, f32, f32, f32) = (-0.2774, -0.598, 0.250, 2.222, -2.222, 0.0);
 const FIELD_SIZE: f32 = 0.037;
-const DELTA_X_ERRECHNET_NUM_ACHSE:f32= 0.02536;
-const DELTA_Y_ERRECHNET_NUM_ACHSE:f32= 0.02674;
 
 /// Represents a UR10 robotic arm that can be controlled via TCP.
 pub struct RobotArm {
@@ -64,14 +50,7 @@ impl ChessTilePosition {
         let rz = A1_COORDINATES.5;
         println!(
             "Converted {}{} to \nx: {}, y: {}, z: {}, rx: {}, ry: {}, rz: {}",
-            self.field_char,
-            self.field_num,
-            x,
-            y,
-            z,
-            rx,
-            ry,
-            rz
+            self.field_char, self.field_num, x, y, z, rx, ry, rz
         );
         (x, y, z, rx, ry, rz)
     }
@@ -121,20 +100,13 @@ impl RobotArm {
         j5: f32,
         j6: f32,
         a: Option<f32>,
-        v: Option<f32>
+        v: Option<f32>,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let a_str = a.map_or(String::new(), |a| format!(", a={}", a));
         let v_str = v.map_or(String::new(), |v| format!(", v={}", v));
         let command = format!(
             "movej([{}, {}, {}, {}, {}, {}]{}{})\n",
-            j1,
-            j2,
-            j3,
-            j4,
-            j5,
-            j6,
-            a_str,
-            v_str
+            j1, j2, j3, j4, j5, j6, a_str, v_str
         );
         println!("command:\n{}", command);
         self.stream.write_all(command.as_bytes()).await?;
@@ -161,20 +133,13 @@ impl RobotArm {
         ry: f32,
         rz: f32,
         a: Option<f32>,
-        v: Option<f32>
+        v: Option<f32>,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let a_str = a.map_or(String::new(), |a| format!(", a={}", a));
         let v_str = v.map_or(String::new(), |v| format!(", v={}", v));
         let command = format!(
             "movel(p[{}, {}, {}, {}, {}, {}]{}{})\n",
-            x,
-            y,
-            z,
-            rx,
-            ry,
-            rz,
-            a_str,
-            v_str
+            x, y, z, rx, ry, rz, a_str, v_str
         );
         println!("command:\n{}", command);
         self.stream.write_all(command.as_bytes()).await?;
@@ -203,20 +168,13 @@ impl RobotArm {
         ry: f32,
         rz: f32,
         a: Option<f32>,
-        v: Option<f32>
+        v: Option<f32>,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let a_str = a.map_or(String::new(), |a| format!(", a={}", a));
         let v_str = v.map_or(String::new(), |v| format!(", v={}", v));
         let command = format!(
             "movep(p[{}, {}, {}, {}, {}, {}]{}{})\n",
-            x,
-            y,
-            z,
-            rx,
-            ry,
-            rz,
-            a_str,
-            v_str
+            x, y, z, rx, ry, rz, a_str, v_str
         );
         println!("command:\n{}", command);
         self.stream.write_all(command.as_bytes()).await?;
@@ -249,7 +207,7 @@ impl RobotArm {
         to_ry: f32,
         to_rz: f32,
         a: Option<f32>,
-        v: Option<f32>
+        v: Option<f32>,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let a_str = a.map_or(String::new(), |a| format!(", a={}", a));
         let v_str = v.map_or(String::new(), |v| format!(", v={}", v));
@@ -302,29 +260,18 @@ impl RobotArm {
         q5: f32,
         q6: f32,
         a: f32,
-        t: f32
+        t: f32,
     ) -> Result<(), Box<dyn std::error::Error>> {
         if a < 0.1 || a > 10.0 {
-            return Err(
-                Box::new(
-                    std::io::Error::new(
-                        std::io::ErrorKind::InvalidInput,
-                        "Invalid acceleration rate for speedj. Allowed values are between 0.1 and 10."
-                    )
-                )
-            );
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                "Invalid acceleration rate for speedj. Allowed values are between 0.1 and 10.",
+            )));
         }
 
         let command = format!(
             "speedj([{},{},{},{},{},{}], a={}, t={})\n",
-            q1,
-            q2,
-            q3,
-            q4,
-            q5,
-            q6,
-            a,
-            t
+            q1, q2, q3, q4, q5, q6, a, t
         );
         self.stream.write_all(command.as_bytes()).await?;
         Ok(())
@@ -339,7 +286,7 @@ impl RobotArm {
         &mut self,
         chess_tile: &ChessTilePosition,
         a: Option<f32>,
-        v: Option<f32>
+        v: Option<f32>,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let (x, y, z, rx, ry, rz) = chess_tile.convert_pos_to_coords();
         self.movel(x, y, z, rx, ry, rz, a, v).await
