@@ -11,6 +11,10 @@ socket.onopen = function () {
 	socket.send("HELLO WORLD");
 };
 
+socket.onclose = function () {
+	console.log("WebSocket connection closed");
+};
+
 const width = 8;
 
 
@@ -108,21 +112,25 @@ function dragDrop(e) {
 
             const endPositionId = e.target.getAttribute('square-id');
             const moveString = `${getPositionAlgebraic(startPositionId)} to ${getPositionAlgebraic(endPositionId)}`;
+            const takenString = `${getPositionAlgebraic(startPositionId)} hit ${getPositionAlgebraic(endPositionId)}`;
 
-            // Output moves to the console
-            console.log(moveString);
-            socket.send(moveString);
+            
 
             // This will immediately reset the info display when a valid move is made before the notification reset timer clears the last notification
             notifyPlayer('', false);
             if (!taken) {
                 e.target.append(draggedElement);
                 // Only change players if the game is still ongoing
+                // Output moves to the console
+                console.log(moveString);
+                socket.send(moveString);
                 if (!checkWin()) changePlayer();
             } else if (takenByOpponent) {
                 document.getElementById(`${playerGo}-captures`).innerHTML += `<div class="captured-piece">${e.target.innerHTML}</div>`;
                 e.target.parentNode.append(draggedElement);
                 e.target.remove();
+                console.log(takenString);
+                socket.send(takenString);
                 // Only change players if the game is still ongoing
                 if (!checkWin()) changePlayer();
             } else notifyPlayer('Du kannst dort nicht hin!');
