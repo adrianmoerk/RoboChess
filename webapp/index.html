@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="startoage.css">
+    <link rel="stylesheet" href="startpage.css">
     <title>Start Page</title>
 </head>
 <body>
+    <div class="container">
+        <h1>Wilkommen zu Robo Chess</h1>
 
-    <h1>Welcome to My Start Page!</h1>
+        <p>Mach dich bereit für eine anspruchsvolle Schachpartie!</p>
 
-    <p>This is a simple start page with a button that links to another page.</p>
+        <span class="start-button" onclick="transitionToPage('chessboard.html')">
+            <button>Start!</button>
+        </span>   
+    </div>
 
-    <a href="chessboard.html">
-        <button class="scale-out-center">Go to Another Page</button>
-    </a>
-
+    
+    <script src="animation.js"></script>
 </body>
 </html>
