@@ -291,4 +291,6 @@ impl RobotArm {
         let (x, y, z, rx, ry, rz) = chess_tile.convert_pos_to_coords();
         self.movel(x, y, z, rx, ry, rz, a, v).await
     }
+
+    
 }

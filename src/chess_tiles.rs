@@ -1,3 +1,6 @@
+//! This module contains the definition of the chess tiles.
+//! Intended for Debugging Purposes.
+//! This saves the trouble of initializing the chess tiles in the main function.
 #![allow(dead_code)]
 use super::robot::ChessTilePosition;
 const CHESS_TILE_POS_A1: ChessTilePosition = ChessTilePosition {
