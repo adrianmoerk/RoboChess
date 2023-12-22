@@ -1,4 +1,4 @@
-package de.adv.rfsprojekt.ur.urscript_commands.tools.robotiq_gripper;
+// package de.adv.rfsprojekt.ur.urscript_commands.tools.robotiq_gripper;
 
 public class RobotIQGripperPreamble {
 
@@ -9,6 +9,9 @@ public class RobotIQGripperPreamble {
      *
      * @return
      */
+    public static void main(String[] args) {
+        System.out.println(getPreamble("COMMANDPLACEHOLDER"));
+    }
     public static String getPreamble(String script) {
         return "def gripper():\n" +
                 "#aliases for the gripper variable names\n" +
