@@ -1,8 +1,10 @@
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
-
+use tokio::time::Duration;
 const A1_COORDINATES: (f32, f32, f32, f32, f32, f32) = (-0.2774, -0.598, 0.250, 2.222, -2.222, 0.0);
 const FIELD_SIZE: f32 = 0.037;
+const MOVE_SLEEP: Duration = Duration::from_millis(6000);
+const GRIP_SLEEP: Duration = Duration::from_millis(5000);
 
 /// Represents a UR10 robotic arm that can be controlled via TCP.
 pub struct RobotArm {
@@ -98,7 +100,7 @@ impl ChessTilePosition {
         };
 
         let y = A1_COORDINATES.1 + FIELD_SIZE * ((self.field_num as f32) - 1.0);
-        let z = A1_COORDINATES.2 - 0.1;
+        let z = A1_COORDINATES.2 - 0.05;
         let rx = A1_COORDINATES.3;
         let ry = A1_COORDINATES.4;
         let rz = A1_COORDINATES.5;
@@ -343,7 +345,9 @@ impl RobotArm {
         v: Option<f32>,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let (x, y, z, rx, ry, rz) = chess_tile.convert_pos_to_coords();
-        self.movel(x, y, z, rx, ry, rz, a, v).await
+        self.movel(x, y, z, rx, ry, rz, a, v).await?;
+        tokio::time::sleep(MOVE_SLEEP).await;
+        Ok(())
     }
     /// Bewegt den Roboterarm nah zum Boden eines bestimmten Schachfeldes.
     ///
@@ -357,19 +361,25 @@ impl RobotArm {
         v: Option<f32>,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let (x, y, z, rx, ry, rz) = chess_tile.convert_pos_to_low_coords();
-        self.movel(x, y, z, rx, ry, rz, a, v).await
+        self.movel(x, y, z, rx, ry, rz, a, v).await?;
+        tokio::time::sleep(MOVE_SLEEP).await;
+        Ok(())
     }
     /// Sends a command to the robot to open the gripper.
     pub async fn open_gripper(&mut self) -> Result<(), Box<dyn std::error::Error>> {
-        let command = "rq_open()\n";
+        let command = "rq_open_and_wait()\n";
+        println!("Sending {}", command);
         self.stream.write_all(command.as_bytes()).await?;
+        tokio::time::sleep(GRIP_SLEEP).await;
         Ok(())
     }
 
     /// Sends a command to the robot to close the gripper.
     pub async fn close_gripper(&mut self) -> Result<(), Box<dyn std::error::Error>> {
-        let command = "rq_close()\n";
+        let command = "rq_close_and_wait()\n";
+        println!("Sending {}", command);
         self.stream.write_all(command.as_bytes()).await?;
+        tokio::time::sleep(GRIP_SLEEP).await;
         Ok(())
     }
     /// Moves the robot arm to the specified chess tile and picks up the chess piece.
