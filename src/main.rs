@@ -17,7 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let command = "rq_reset_and_wait()\n";
         roboter_arm
             .stream
-            .write_all(command.as_bytes())
+            .write_all(gripper::generate_gripper_command(command.to_string()).as_bytes())
             .await
             .unwrap();
         tokio::time::sleep(Duration::from_secs(3)).await;
@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let command = "rq_activate_and_wait()\n";
         roboter_arm
             .stream
-            .write_all(command.as_bytes())
+            .write_all(gripper::generate_gripper_command(command.to_string()).as_bytes())
             .await
             .unwrap();
         tokio::time::sleep(Duration::from_secs(3)).await;

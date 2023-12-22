@@ -1,4 +1,4 @@
-fn generate_gripper_command(command: String) -> String {
+pub fn generate_gripper_command(command: String) -> String {
     format!("
         def gripper():
         #aliases for the gripper variable names

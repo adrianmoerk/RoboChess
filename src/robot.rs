@@ -1,3 +1,4 @@
+use crate::gripper;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
 use tokio::time::Duration;
@@ -369,7 +370,9 @@ impl RobotArm {
     pub async fn open_gripper(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let command = "rq_open_and_wait()\n";
         println!("Sending {}", command);
-        self.stream.write_all(command.as_bytes()).await?;
+        self.stream
+            .write_all(gripper::generate_gripper_command(command.to_string()).as_bytes())
+            .await?;
         tokio::time::sleep(GRIP_SLEEP).await;
         Ok(())
     }
@@ -378,7 +381,9 @@ impl RobotArm {
     pub async fn close_gripper(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let command = "rq_close_and_wait()\n";
         println!("Sending {}", command);
-        self.stream.write_all(command.as_bytes()).await?;
+        self.stream
+            .write_all(gripper::generate_gripper_command(command.to_string()).as_bytes())
+            .await?;
         tokio::time::sleep(GRIP_SLEEP).await;
         Ok(())
     }
