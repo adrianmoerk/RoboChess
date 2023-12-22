@@ -137,7 +137,26 @@ impl RobotArm {
     /// # }
     /// ```
     pub async fn new(address: &str) -> Result<Self, Box<dyn std::error::Error>> {
-        let stream = TcpStream::connect(address).await?;
+        let mut stream = TcpStream::connect(address).await?;
+
+        // Send Gripper Reset Request
+        println!("Resetting Gripper RQ");
+        let command = "rq_reset_and_wait()\n";
+        stream
+            .write_all(gripper::generate_gripper_command(command.to_string()).as_bytes())
+            .await
+            .unwrap();
+        tokio::time::sleep(Duration::from_secs(3)).await;
+
+        // Send Gripper Activation Request
+        println!("Activating Gripper RQ");
+        let command = "rq_activate_and_wait()\n";
+        stream
+            .write_all(gripper::generate_gripper_command(command.to_string()).as_bytes())
+            .await
+            .unwrap();
+        tokio::time::sleep(Duration::from_secs(3)).await;
+
         Ok(RobotArm { stream })
     }
 
