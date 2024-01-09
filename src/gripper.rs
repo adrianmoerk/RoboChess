@@ -1,3 +1,8 @@
+/// converts a URSCRIPT command to a string that can be sent to the robot's gripper
+/// # Arguments
+/// * `command` - the URSCRIPT command to be converted
+/// # Returns
+/// * `String` - the converted command
 pub fn generate_gripper_command(command: String) -> String {
     format!("
         def gripper():
