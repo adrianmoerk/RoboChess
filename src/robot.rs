@@ -10,6 +10,7 @@ const GRIP_SLEEP: Duration = Duration::from_millis(5000);
 /// Represents a UR10 robotic arm that can be controlled via TCP.
 pub struct RobotArm {
     pub stream: TcpStream,
+    pub gripper_stream: TcpStream,
 }
 /// Represents a chess tile on the chess board.
 pub struct ChessTilePosition {
@@ -136,13 +137,16 @@ impl RobotArm {
     /// # Ok(())
     /// # }
     /// ```
-    pub async fn new(address: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    pub async fn new(
+        address: &str,
+        gripper_address: &str,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
         let mut stream = TcpStream::connect(address).await?;
-
+        let mut gripper_stream = TcpStream::connect(gripper_address).await?;
         // Send Gripper Reset Request
         println!("Resetting Gripper RQ");
         let command = "rq_reset_and_wait()\n";
-        stream
+        gripper_stream
             .write_all(gripper::generate_gripper_command(command.to_string()).as_bytes())
             .await
             .unwrap();
@@ -151,13 +155,16 @@ impl RobotArm {
         // Send Gripper Activation Request
         println!("Activating Gripper RQ");
         let command = "rq_activate_and_wait()\n";
-        stream
+        gripper_stream
             .write_all(gripper::generate_gripper_command(command.to_string()).as_bytes())
             .await
             .unwrap();
         tokio::time::sleep(Duration::from_secs(3)).await;
 
-        Ok(RobotArm { stream })
+        Ok(RobotArm {
+            stream,
+            gripper_stream,
+        })
     }
 
     /// Moves the robot arm along a joint path.
@@ -389,7 +396,7 @@ impl RobotArm {
     pub async fn open_gripper(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let command = "rq_open_and_wait()\n";
         println!("Sending {}", command);
-        self.stream
+        self.gripper_stream
             .write_all(gripper::generate_gripper_command(command.to_string()).as_bytes())
             .await?;
         tokio::time::sleep(GRIP_SLEEP).await;
@@ -400,7 +407,7 @@ impl RobotArm {
     pub async fn close_gripper(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let command = "rq_close_and_wait()\n";
         println!("Sending {}", command);
-        self.stream
+        self.gripper_stream
             .write_all(gripper::generate_gripper_command(command.to_string()).as_bytes())
             .await?;
         tokio::time::sleep(GRIP_SLEEP).await;
