@@ -74,6 +74,7 @@ createBoard();
 // The position on the board the piece starts from
 let startPositionId = -1;
 let draggedElement;
+let droppedElement;
 
 const allSquares = document.querySelectorAll('.square');
 
@@ -94,6 +95,7 @@ function dragStart(e) {
 function dragOver(e) {
     //
     e.preventDefault();
+    droppedElement = e.target
 }
 
 
@@ -103,34 +105,39 @@ function dragDrop(e) {
 
     const correctGo = draggedElement.firstChild.classList.contains(playerGo + '-piece');
     // Ternary operator
+    console.log(e.target)
     const opponentGo = playerGo === 'Schwarz' ? 'Weiss' : 'Schwarz';
     const taken = e.target.classList.contains('piece');
     const takenByOpponent = e.target.firstChild?.classList.contains(opponentGo + '-piece');
-
     if (correctGo) {
         if (isValidMove(e.target, taken, takenByOpponent)) {
-
+            //console.log(e.target)
             const endPositionId = e.target.getAttribute('square-id');
             const moveString = `${getPositionAlgebraic(startPositionId)} to ${getPositionAlgebraic(endPositionId)}`;
-            const takenString = `${getPositionAlgebraic(startPositionId)} hit ${getPositionAlgebraic(endPositionId)}`;
-
             
-
+            
             // This will immediately reset the info display when a valid move is made before the notification reset timer clears the last notification
             notifyPlayer('', false);
             if (!taken) {
                 e.target.append(draggedElement);
                 // Only change players if the game is still ongoing
-                // Output moves to the console
+                // Output moves to the console and WebSocket
                 console.log(moveString);
                 socket.send(moveString);
                 if (!checkWin()) changePlayer();
             } else if (takenByOpponent) {
+                e.target.setAttribute('square-id', droppedElement.parentNode.getAttribute('square-id'))
+                const endPositionId = e.target.getAttribute('square-id');
+                const takenString = `${getPositionAlgebraic(startPositionId)} hit ${getPositionAlgebraic(endPositionId)}`;
+                //console.log(startPositionId, endPositionId)
+                //Ouput moves that took another figure to console and WebSocket
+                console.log(endPositionId)
+                console.log(takenString);
+                socket.send(takenString);
                 document.getElementById(`${playerGo}-captures`).innerHTML += `<div class="captured-piece">${e.target.innerHTML}</div>`;
                 e.target.parentNode.append(draggedElement);
                 e.target.remove();
-                console.log(takenString);
-                socket.send(takenString);
+                
                 // Only change players if the game is still ongoing
                 if (!checkWin()) changePlayer();
             } else notifyPlayer('Du kannst dort nicht hin!');
