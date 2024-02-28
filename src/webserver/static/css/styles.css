@@ -1,0 +1,93 @@
+body {
+    opacity: 0;
+    transition: opacity 1s;
+}
+
+.game-container {
+    width: fit-content;
+    margin: auto;
+}
+
+#gameboard {
+    width: 320px;
+    height: 320px;
+    background-color: black;
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid gray;
+    margin: 10px 0;
+}
+
+.square {
+    width: 40px;
+    height: 40px;
+    position: relative;
+}
+
+.Weiss-square {
+    background-color: rgb(255, 255, 255);
+}
+
+.Schwarz-square {
+    background-color: rgb(71, 164, 70);
+}
+
+.square svg {
+    width: 30px;
+    height: 30px;
+    margin: 5px;
+    position: relative;
+    z-index: -9;
+}
+
+path {
+    position: relative;
+    z-index: -10;
+}
+
+.piece {
+    position: relative;
+    z-index: 9;
+}
+
+.Schwarz-piece {
+    fill: rgb(28, 28, 28);
+    stroke-width: 8px;
+    stroke: white;
+}
+
+.Weiss-piece {
+    fill: rgb(255, 255, 255);
+    stroke-width: 8px;
+    stroke: black;
+}
+
+.captures {
+    margin-left: 20px;
+}
+
+#Schwarz-captures,
+#Weiss-captures {
+    display: flex;
+    flex-wrap: wrap;
+    background-color: ghostwhite;
+    width: 240px;
+    height: 60px;
+    border: 1px solid rgba(177, 62, 87, 0.4);
+    margin: auto;
+}
+
+#Schwarz-captures {
+    border-color: rgba(43, 43, 43, 0.4);
+}
+
+.captured-piece {
+    width: 30px;
+    height: 30px;
+}
+
+.captured-piece svg {
+    width: 20px;
+    height: 20px;
+    padding: 5px
+}

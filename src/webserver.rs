@@ -64,7 +64,7 @@ pub async fn start_webserver() -> std::io::Result<()> {
 /// all html requests to root will proc this method, should lead to some kind of index.html or similar
 #[get("/")]
 async fn index() -> impl Responder {
-    let html = include_str!("webserver/static/index.html");
+    let html = include_str!("webserver/static/chessboard.html");
     HttpResponse::Ok().content_type("text/html").body(html)
 }
 /// service that hosts a websocket server
