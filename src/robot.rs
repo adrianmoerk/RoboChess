@@ -32,28 +32,18 @@ impl ChessTilePosition {
         }
     }
     /// Creates a new instance of the `ChessTileCoordinates` struct from a string.
-    pub fn position_from_str(position_str: String) -> Self {
-        let position_str_vec = position_str.split("").collect::<Vec<&str>>();
-        let field_char = position_str_vec
-            .get(0)
-            .unwrap()
-            .to_string()
-            .chars()
-            .next()
-            .unwrap();
-        let field_num = position_str_vec
-            .get(1)
-            .unwrap()
-            .to_string()
-            .parse::<u8>()
-            .unwrap();
-        println!(
-            "GOT {}, converted to {}{}",
-            position_str, field_char, field_num
-        );
+    pub fn position_from_str(input: String) -> Self {
+        let chars: Vec<char> = input.chars().collect();
+
+        // Assuming the letter is always the first character and the rest is the number
+        let letter = chars[0];
+        let number_str: String = chars[1..].iter().collect();
+
+        let number = number_str.parse::<i32>().unwrap();
+        println!("Command gave Letter: {}, Number: {}", letter, number);
         Self {
-            field_char,
-            field_num,
+            field_char: letter,
+            field_num: number as u8,
         }
     }
     /// Converts the chess tile coordinates to cartesian coordinates.
