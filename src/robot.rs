@@ -433,7 +433,7 @@ impl RobotArm {
         chess_tile: &ChessTilePosition,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let (x, y, z, rx, ry, rz) = chess_tile.convert_pos_to_coords();
-        let a = Some(1.0);
+        let a = Some(2.0);
         let v = Some(1.0);
         self.movel(x, y, z, rx, ry, rz, a, v).await?;
         tokio::time::sleep(MOVE_SLEEP).await;
@@ -461,10 +461,8 @@ impl RobotArm {
             .unwrap();
         // open gripper, place chess piece on destination field
         self.open_gripper().await.unwrap();
-        // move back up to safe height
-        self.rip_off_figure(destination_chess_tile)
-            .await
-            .unwrap();
+        // move back up to safe height while ripping off the figure
+        self.rip_off_figure(destination_chess_tile).await.unwrap();
         Ok(())
     }
     /// Moves a chess piece from one field to another, removing the chess piece on the destination field.
