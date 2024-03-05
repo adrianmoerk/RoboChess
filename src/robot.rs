@@ -422,6 +422,24 @@ impl RobotArm {
         self.move_to_field(chess_tile, None, None).await?;
         Ok(())
     }
+
+    /// Reißt die Figur vom Magneten ab
+    ///
+    /// # Arguments
+    ///
+    /// * `chess_tile` - Die Koordinaten des Schachfeldes im `ChessTileCoordinates` Format.
+    pub async fn rip_off_figure(
+        &mut self,
+        chess_tile: &ChessTilePosition,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let (x, y, z, rx, ry, rz) = chess_tile.convert_pos_to_coords();
+        let a = Some(1.0);
+        let v = Some(1.0);
+        self.movel(x, y, z, rx, ry, rz, a, v).await?;
+        tokio::time::sleep(MOVE_SLEEP).await;
+        Ok(())
+    }
+
     /// Moves a chess piece from one field to another.
     /// # Arguments
     /// * `from_chess_tile` - The coordinates of the field to pick up the chess piece from.
@@ -444,7 +462,7 @@ impl RobotArm {
         // open gripper, place chess piece on destination field
         self.open_gripper().await.unwrap();
         // move back up to safe height
-        self.move_to_field(destination_chess_tile, None, None)
+        self.rip_off_figure(destination_chess_tile)
             .await
             .unwrap();
         Ok(())
