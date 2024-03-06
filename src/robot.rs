@@ -462,7 +462,8 @@ impl RobotArm {
         // open gripper, place chess piece on destination field
         self.open_gripper().await.unwrap();
         // move back up to safe height while ripping off the figure
-        self.rip_off_figure(destination_chess_tile).await.unwrap();
+        self.move_to_field(destination_chess_tile, None, None).await.unwrap();
+        // self.rip_off_figure(destination_chess_tile).await.unwrap();
         Ok(())
     }
     /// Moves a chess piece from one field to another, removing the chess piece on the destination field.
