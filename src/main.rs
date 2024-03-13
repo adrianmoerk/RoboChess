@@ -15,16 +15,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .await
             .unwrap();
         tokio::time::sleep(Duration::from_secs(5)).await;
-        
-        // roboter_arm
-        //     .move_chesspiece_to_empty_field(
-        //         &chess_tiles::CHESS_TILE_POS_A1,
-        //         &chess_tiles::CHESS_TILE_POS_D8,
-        //     )
-        //     .await
-        //     .unwrap();
 
-        // COMMENT IN THIS LOGIC TO BIND THIS TO THE GUI
         let mut ws = WebSocket::connect("ws://127.0.0.1:8080/ws")
             .await
             .expect("Failed to Connect to Websocket");

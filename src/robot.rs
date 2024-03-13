@@ -5,7 +5,7 @@ use tokio::time::Duration;
 const A1_COORDINATES: (f32, f32, f32, f32, f32, f32) = (-0.2774, -0.598, 0.250, 2.222, -2.222, 0.0);
 const FIELD_SIZE: f32 = 0.037;
 const MOVE_SLEEP: Duration = Duration::from_millis(6000);
-const GRIP_SLEEP: Duration = Duration::from_millis(5000);
+const GRIP_SLEEP: Duration = Duration::from_millis(3000);
 
 /// Represents a UR10 robotic arm that can be controlled via TCP.
 pub struct RobotArm {
