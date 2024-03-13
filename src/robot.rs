@@ -384,12 +384,7 @@ impl RobotArm {
     }
     /// Sends a command to the robot to open the gripper.
     pub async fn open_gripper(&mut self) -> Result<(), Box<dyn std::error::Error>> {
-        let command = "rq_open_and_wait()\n";
-        println!("Sending {}", command);
-        self.gripper_stream
-            .write_all(gripper::generate_gripper_command(command.to_string()).as_bytes())
-            .await?;
-        tokio::time::sleep(GRIP_SLEEP).await;
+        self.set_gripper_position(160).await.unwrap();
         Ok(())
     }
 
@@ -410,7 +405,7 @@ impl RobotArm {
         &mut self,
         position: u8,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        let command = format!("rq_move_and_wait({}, gripper_socket)\n", position);
+        let command = format!("rq_move_and_wait({})\n", position);
         println!("Sending {}", command);
         self.gripper_stream
             .write_all(gripper::generate_gripper_command(command.to_string()).as_bytes())
