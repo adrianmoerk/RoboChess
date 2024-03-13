@@ -5,6 +5,7 @@ use tokio::io::AsyncWriteExt;
 mod chess_tiles;
 mod gripper;
 mod robot;
+use chess_tiles::CHESS_TILE_POS_A1;
 mod webserver;
 use websockets::WebSocket;
 
@@ -15,7 +16,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .await
             .unwrap();
         tokio::time::sleep(Duration::from_secs(5)).await;
-
+        // move to a1
+        roboter_arm
+            .move_to_field(&CHESS_TILE_POS_A1, None, None)
+            .await
+            .unwrap();
         let mut ws = WebSocket::connect("ws://127.0.0.1:8080/ws")
             .await
             .expect("Failed to Connect to Websocket");

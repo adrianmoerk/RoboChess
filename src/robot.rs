@@ -11,8 +11,10 @@ const GRIP_SLEEP: Duration = Duration::from_millis(3000);
 pub struct RobotArm {
     pub stream: TcpStream,
     pub gripper_stream: TcpStream,
+    current_position: ChessTilePosition,
 }
 /// Represents a chess tile on the chess board.
+#[derive(Clone)]
 pub struct ChessTilePosition {
     // field in a to h
     pub field_char: char,
@@ -141,7 +143,6 @@ impl RobotArm {
             .await
             .unwrap();
         tokio::time::sleep(Duration::from_secs(3)).await;
-
         // Send Gripper Activation Request
         println!("Activating Gripper RQ");
         let command = "rq_activate_and_wait()\n";
@@ -154,6 +155,7 @@ impl RobotArm {
         Ok(RobotArm {
             stream,
             gripper_stream,
+            current_position: ChessTilePosition::new_position('a', 1),
         })
     }
 
@@ -363,7 +365,45 @@ impl RobotArm {
     ) -> Result<(), Box<dyn std::error::Error>> {
         let (x, y, z, rx, ry, rz) = chess_tile.convert_pos_to_coords();
         self.movel(x, y, z, rx, ry, rz, a, v).await?;
+        self.update_current_position(chess_tile.clone());
         tokio::time::sleep(MOVE_SLEEP).await;
+        Ok(())
+    }
+
+    /// Aktualisiert die aktuelle Position des Roboters.
+    fn update_current_position(&mut self, new_position: ChessTilePosition) {
+        self.current_position = new_position;
+    }
+
+    /// Berechnet die Schlafdauer basierend auf der Distanz zwischen zwei Schachfeldern.
+    fn calculate_sleep_duration(
+        &self,
+        start: &ChessTilePosition,
+        end: &ChessTilePosition,
+    ) -> Duration {
+        // Berechne die Distanz in Feldern für beide Achsen
+        let horizontal_distance = (start.field_char as i32 - end.field_char as i32).abs();
+        let vertical_distance = (start.field_num as i32 - end.field_num as i32).abs();
+
+        // Nutze das Maximum der beiden Distanzen
+        let max_distance = horizontal_distance.max(vertical_distance);
+
+        // Berechne die Schlafdauer: Pro Feld teilen wir MOVE_SLEEP durch 8 (maximale Distanz)
+        // und multiplizieren das Ergebnis mit der tatsächlichen Distanz
+        Duration::from_millis((MOVE_SLEEP.as_millis() / 8 * max_distance as u128) as u64)
+    }
+
+    /// Bewegt den Roboterarm zu einem bestimmten Schachfeld und wartet eine dynamische Schlafdauer.
+    pub async fn move_to_field_with_dynamic_sleep(
+        &mut self,
+        target: &ChessTilePosition,
+        a: Option<f32>,
+        v: Option<f32>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let sleep_duration = self.calculate_sleep_duration(&self.current_position, target);
+        self.move_to_field(target, a, v).await?;
+        tokio::time::sleep(sleep_duration).await;
+        self.update_current_position(target.clone()); // Aktualisiere die aktuelle Position nach der Bewegung
         Ok(())
     }
     /// Bewegt den Roboterarm nah zum Boden eines bestimmten Schachfeldes.
@@ -379,7 +419,7 @@ impl RobotArm {
     ) -> Result<(), Box<dyn std::error::Error>> {
         let (x, y, z, rx, ry, rz) = chess_tile.convert_pos_to_low_coords();
         self.movel(x, y, z, rx, ry, rz, a, v).await?;
-        tokio::time::sleep(MOVE_SLEEP).await;
+        tokio::time::sleep(Duration::from_millis(1000)).await;
         Ok(())
     }
     /// Sends a command to the robot to open the gripper.
@@ -421,7 +461,7 @@ impl RobotArm {
         chess_tile: &ChessTilePosition,
     ) -> Result<(), Box<dyn std::error::Error>> {
         // move over field
-        self.move_to_field(chess_tile, None, None).await?;
+        self.move_to_field_with_dynamic_sleep(chess_tile, None, None).await?;
         // open gripper
         self.open_gripper().await?;
         // move down
@@ -429,24 +469,7 @@ impl RobotArm {
         // close gripper
         self.close_gripper().await?;
         // move up
-        self.move_to_field(chess_tile, None, None).await?;
-        Ok(())
-    }
-
-    /// Reißt die Figur vom Magneten ab
-    ///
-    /// # Arguments
-    ///
-    /// * `chess_tile` - Die Koordinaten des Schachfeldes im `ChessTileCoordinates` Format.
-    pub async fn rip_off_figure(
-        &mut self,
-        chess_tile: &ChessTilePosition,
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        let (x, y, z, rx, ry, rz) = chess_tile.convert_pos_to_coords();
-        let a = Some(2.0);
-        let v = Some(1.0);
-        self.movel(x, y, z, rx, ry, rz, a, v).await?;
-        tokio::time::sleep(MOVE_SLEEP).await;
+        self.move_to_field_with_dynamic_sleep(chess_tile, None, None).await?;
         Ok(())
     }
 
@@ -462,7 +485,7 @@ impl RobotArm {
         // pickup chess piece from original field
         self.pickup_chess_piece(from_chess_tile).await.unwrap();
         // move over destination field
-        self.move_to_field(destination_chess_tile, None, None)
+        self.move_to_field_with_dynamic_sleep(destination_chess_tile, None, None)
             .await
             .unwrap();
         // move down to destination height
@@ -472,7 +495,7 @@ impl RobotArm {
         // open gripper, place chess piece on destination field
         self.open_gripper().await.unwrap();
         // move back up to safe height while ripping off the figure
-        self.move_to_field(destination_chess_tile, None, None)
+        self.move_to_field_with_dynamic_sleep(destination_chess_tile, None, None)
             .await
             .unwrap();
         // self.rip_off_figure(destination_chess_tile).await.unwrap();
@@ -492,7 +515,7 @@ impl RobotArm {
             .await
             .unwrap();
         // move chesspiece to dead pieces area
-        self.move_to_field(
+        self.move_to_field_with_dynamic_sleep(
             &ChessTilePosition::new_position(destination_chess_tile.field_char, 9),
             None,
             None,
