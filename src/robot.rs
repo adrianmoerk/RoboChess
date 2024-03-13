@@ -403,6 +403,19 @@ impl RobotArm {
         tokio::time::sleep(GRIP_SLEEP).await;
         Ok(())
     }
+    /// Sends a command to the robot to set the gripper position.
+    pub async fn set_gripper_position(
+        &mut self,
+        position: u8,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let command = format!("rq_move_and_wait({}, gripper_socket)\n", position);
+        println!("Sending {}", command);
+        self.gripper_stream
+            .write_all(gripper::generate_gripper_command(command.to_string()).as_bytes())
+            .await?;
+        tokio::time::sleep(GRIP_SLEEP).await;
+        Ok(())
+    }
     /// Moves the robot arm to the specified chess tile and picks up the chess piece.
     /// # Arguments
     /// * `chess_tile` - The coordinates of the field to pick up the chess piece from.
@@ -462,7 +475,9 @@ impl RobotArm {
         // open gripper, place chess piece on destination field
         self.open_gripper().await.unwrap();
         // move back up to safe height while ripping off the figure
-        self.move_to_field(destination_chess_tile, None, None).await.unwrap();
+        self.move_to_field(destination_chess_tile, None, None)
+            .await
+            .unwrap();
         // self.rip_off_figure(destination_chess_tile).await.unwrap();
         Ok(())
     }
