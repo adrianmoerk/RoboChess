@@ -92,7 +92,7 @@ impl ChessTilePosition {
         };
 
         let y = A1_COORDINATES.1 + FIELD_SIZE * ((self.field_num as f32) - 1.0);
-        let z = A1_COORDINATES.2 - 0.05;
+        let z = A1_COORDINATES.2 - 0.075;
         let rx = A1_COORDINATES.3;
         let ry = A1_COORDINATES.4;
         let rz = A1_COORDINATES.5;
@@ -404,6 +404,8 @@ impl RobotArm {
         Ok(())
     }
     /// Sends a command to the robot to set the gripper position.
+    /// # Arguments
+    /// * `position` - The position to set the gripper to. 0 is open, 255 is closed.
     pub async fn set_gripper_position(
         &mut self,
         position: u8,
@@ -496,7 +498,14 @@ impl RobotArm {
             .unwrap();
         // move chesspiece to dead pieces area
         self.move_to_field(
-            &ChessTilePosition::new_position(destination_chess_tile.field_char, 10),
+            &ChessTilePosition::new_position(destination_chess_tile.field_char, 9),
+            None,
+            None,
+        )
+        .await
+        .unwrap();
+        self.move_to_field_low(
+            &ChessTilePosition::new_position(destination_chess_tile.field_char, 9),
             None,
             None,
         )

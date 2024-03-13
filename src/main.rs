@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         loop {
             let gui_command = ws.receive().await.unwrap().as_text().unwrap().0.to_string();
             println!("received command: {:?}", gui_command);
-            if gui_command.contains(" to ") {
+            if gui_command.contains(" to ") || gui_command.contains(" hit ") {
                 let gui_command_vec = gui_command.split(" ").collect::<Vec<&str>>();
                 let from_field_str = gui_command_vec.get(0).unwrap().to_string();
                 let move_operation_str = gui_command_vec.get(1).unwrap().to_string();
