@@ -17,6 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .unwrap();
         tokio::time::sleep(Duration::from_secs(5)).await;
         // move to a1
+        roboter_arm.set_gripper_position(160).await.unwrap();
         roboter_arm
             .move_to_field(&CHESS_TILE_POS_A1, None, None)
             .await

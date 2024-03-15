@@ -4,8 +4,8 @@ use tokio::net::TcpStream;
 use tokio::time::Duration;
 const A1_COORDINATES: (f32, f32, f32, f32, f32, f32) = (-0.2774, -0.598, 0.250, 2.222, -2.222, 0.0);
 const FIELD_SIZE: f32 = 0.037;
-const MOVE_SLEEP: Duration = Duration::from_millis(6000);
-const GRIP_SLEEP: Duration = Duration::from_millis(3000);
+const MOVE_SLEEP: Duration = Duration::from_millis(8000);
+const GRIP_SLEEP: Duration = Duration::from_millis(2500);
 
 /// Represents a UR10 robotic arm that can be controlled via TCP.
 pub struct RobotArm {
@@ -400,8 +400,13 @@ impl RobotArm {
         a: Option<f32>,
         v: Option<f32>,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        let sleep_duration = self.calculate_sleep_duration(&self.current_position, target);
-        self.move_to_field(target, a, v).await?;
+        let mut sleep_duration = self.calculate_sleep_duration(&self.current_position, target);
+        if sleep_duration < Duration::from_secs(1) {
+            sleep_duration = Duration::from_millis(1500);
+        }
+        let (x, y, z, rx, ry, rz) = target.convert_pos_to_coords();
+        self.movel(x, y, z, rx, ry, rz, a, v).await?;
+        self.update_current_position(target.clone());
         tokio::time::sleep(sleep_duration).await;
         self.update_current_position(target.clone()); // Aktualisiere die aktuelle Position nach der Bewegung
         Ok(())
@@ -419,7 +424,7 @@ impl RobotArm {
     ) -> Result<(), Box<dyn std::error::Error>> {
         let (x, y, z, rx, ry, rz) = chess_tile.convert_pos_to_low_coords();
         self.movel(x, y, z, rx, ry, rz, a, v).await?;
-        tokio::time::sleep(Duration::from_millis(1000)).await;
+        tokio::time::sleep(Duration::from_millis(2000)).await;
         Ok(())
     }
     /// Sends a command to the robot to open the gripper.
@@ -461,7 +466,8 @@ impl RobotArm {
         chess_tile: &ChessTilePosition,
     ) -> Result<(), Box<dyn std::error::Error>> {
         // move over field
-        self.move_to_field_with_dynamic_sleep(chess_tile, None, None).await?;
+        self.move_to_field_with_dynamic_sleep(chess_tile, None, None)
+            .await?;
         // open gripper
         self.open_gripper().await?;
         // move down
@@ -469,7 +475,8 @@ impl RobotArm {
         // close gripper
         self.close_gripper().await?;
         // move up
-        self.move_to_field_with_dynamic_sleep(chess_tile, None, None).await?;
+        self.move_to_field_with_dynamic_sleep(chess_tile, None, None)
+            .await?;
         Ok(())
     }
 
@@ -532,6 +539,9 @@ impl RobotArm {
         // open gripper
         self.open_gripper().await.unwrap();
         // move to empty field
+        self.move_to_field_with_dynamic_sleep(destination_chess_tile, None, None)
+            .await
+            .unwrap();
         self.move_chesspiece_to_empty_field(from_chess_tile, destination_chess_tile)
             .await
             .unwrap();
