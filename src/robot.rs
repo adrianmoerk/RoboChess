@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::gripper;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
@@ -12,7 +14,7 @@ pub struct RobotArm {
     pub stream: TcpStream,
     pub gripper_stream: TcpStream,
     current_position: ChessTilePosition,
-    hit_counter: u8,
+    hit_counter_map: HashMap<char, i16>,
 }
 /// Represents a chess tile on the chess board.
 #[derive(Clone)]
@@ -20,7 +22,7 @@ pub struct ChessTilePosition {
     // field in a to h
     pub field_char: char,
     // field from 1 to 8
-    pub field_num: u8,
+    pub field_num: i16,
 }
 
 impl ChessTilePosition {
@@ -28,7 +30,7 @@ impl ChessTilePosition {
     /// # Arguments
     /// * `field_char` - The field in a to h
     /// * `field_num` - The field from 1 to 8
-    pub fn new_position(field_char: char, field_num: u8) -> Self {
+    pub fn new_position(field_char: char, field_num: i16) -> Self {
         Self {
             field_char,
             field_num,
@@ -46,7 +48,7 @@ impl ChessTilePosition {
         println!("Command gave Letter: {}, Number: {}", letter, number);
         Self {
             field_char: letter,
-            field_num: number as u8,
+            field_num: number as i16,
         }
     }
     /// Converts the chess tile coordinates to cartesian coordinates.
@@ -66,7 +68,7 @@ impl ChessTilePosition {
         };
 
         let y = A1_COORDINATES.1 + FIELD_SIZE * ((self.field_num as f32) - 1.0);
-        let z = A1_COORDINATES.2;
+        let z = A1_COORDINATES.2 + 0.05;
         let rx = A1_COORDINATES.3;
         let ry = A1_COORDINATES.4;
         let rz = A1_COORDINATES.5;
@@ -95,7 +97,7 @@ impl ChessTilePosition {
         };
 
         let y = A1_COORDINATES.1 + FIELD_SIZE * ((self.field_num as f32) - 1.0);
-        let z = A1_COORDINATES.2 - 0.075;
+        let z = A1_COORDINATES.2 - 0.068;
         let rx = A1_COORDINATES.3;
         let ry = A1_COORDINATES.4;
         let rz = A1_COORDINATES.5;
@@ -157,7 +159,7 @@ impl RobotArm {
             stream,
             gripper_stream,
             current_position: ChessTilePosition::new_position('a', 1),
-            hit_counter: 0,
+            hit_counter_map: HashMap::new(),
         })
     }
 
@@ -404,7 +406,7 @@ impl RobotArm {
     ) -> Result<(), Box<dyn std::error::Error>> {
         let mut sleep_duration = self.calculate_sleep_duration(&self.current_position, target);
         if sleep_duration < Duration::from_secs(1) {
-            sleep_duration = Duration::from_millis(1500);
+            sleep_duration = Duration::from_millis(2000);
         }
         let (x, y, z, rx, ry, rz) = target.convert_pos_to_coords();
         self.movel(x, y, z, rx, ry, rz, a, v).await?;
@@ -426,7 +428,7 @@ impl RobotArm {
     ) -> Result<(), Box<dyn std::error::Error>> {
         let (x, y, z, rx, ry, rz) = chess_tile.convert_pos_to_low_coords();
         self.movel(x, y, z, rx, ry, rz, a, v).await?;
-        tokio::time::sleep(Duration::from_millis(2000)).await;
+        tokio::time::sleep(Duration::from_millis(3500)).await;
         Ok(())
     }
     /// Sends a command to the robot to open the gripper.
@@ -524,21 +526,19 @@ impl RobotArm {
             .await
             .unwrap();
         // move chesspiece to dead pieces area
-        self.move_to_field_with_dynamic_sleep(
-            &ChessTilePosition::new_position(
-                destination_chess_tile.field_char,
-                0 - self.hit_counter,
-            ),
-            None,
-            None,
-        )
-        .await
-        .unwrap();
+        let hit_count = self
+            .hit_counter_map
+            .entry(destination_chess_tile.field_char)
+            .or_insert(0);
+        // *hit_count = *hit_count - 1; // This line updates the value, adjust logic as needed.
+
+        let graveyard =
+            &ChessTilePosition::new_position(destination_chess_tile.field_char, *hit_count);
+        self.move_to_field_with_dynamic_sleep(graveyard, None, None)
+            .await
+            .unwrap();
         self.move_to_field_low(
-            &ChessTilePosition::new_position(
-                destination_chess_tile.field_char,
-                0 - self.hit_counter,
-            ),
+            &ChessTilePosition::new_position(graveyard.field_char, graveyard.field_num),
             None,
             None,
         )
@@ -547,13 +547,17 @@ impl RobotArm {
         // open gripper
         self.open_gripper().await.unwrap();
         // move to empty field
-        self.move_to_field_with_dynamic_sleep(destination_chess_tile, None, None)
-            .await
-            .unwrap();
+        self.move_to_field_with_dynamic_sleep(
+            &ChessTilePosition::new_position(graveyard.field_char, graveyard.field_num),
+            None,
+            None,
+        )
+        .await
+        .unwrap();
         self.move_chesspiece_to_empty_field(from_chess_tile, destination_chess_tile)
             .await
             .unwrap();
-        self.hit_counter += 1;
+        *self.hit_counter_map.get_mut(&graveyard.field_char).unwrap() -= 1;
         Ok(())
     }
 }
