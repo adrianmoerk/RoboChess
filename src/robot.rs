@@ -12,6 +12,7 @@ pub struct RobotArm {
     pub stream: TcpStream,
     pub gripper_stream: TcpStream,
     current_position: ChessTilePosition,
+    hit_counter: u8,
 }
 /// Represents a chess tile on the chess board.
 #[derive(Clone)]
@@ -156,6 +157,7 @@ impl RobotArm {
             stream,
             gripper_stream,
             current_position: ChessTilePosition::new_position('a', 1),
+            hit_counter: 0,
         })
     }
 
@@ -523,14 +525,20 @@ impl RobotArm {
             .unwrap();
         // move chesspiece to dead pieces area
         self.move_to_field_with_dynamic_sleep(
-            &ChessTilePosition::new_position(destination_chess_tile.field_char, 9),
+            &ChessTilePosition::new_position(
+                destination_chess_tile.field_char,
+                0 - self.hit_counter,
+            ),
             None,
             None,
         )
         .await
         .unwrap();
         self.move_to_field_low(
-            &ChessTilePosition::new_position(destination_chess_tile.field_char, 9),
+            &ChessTilePosition::new_position(
+                destination_chess_tile.field_char,
+                0 - self.hit_counter,
+            ),
             None,
             None,
         )
@@ -545,7 +553,7 @@ impl RobotArm {
         self.move_chesspiece_to_empty_field(from_chess_tile, destination_chess_tile)
             .await
             .unwrap();
-
+        self.hit_counter += 1;
         Ok(())
     }
 }
